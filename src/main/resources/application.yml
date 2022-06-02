@@ -1,0 +1,12 @@
+# mongodb+srv://xapaya:<password>@xapacluster.6onaa.mongodb.net/?retryWrites=true&w=majority
+spring:
+  data:
+    mongodb:
+      uri: mongodb+srv://xapaya:LcDn7lrChVCtH82u@xapacluster.6onaa.mongodb.net/?retryWrites=true&w=majority
+      database: olivappdb
+# App Properties
+app:
+  auth:
+    jwtCookieName: olivapp
+    jwtSecret: olivappSecretKey
+    jwtExpirationMs: 86400000
