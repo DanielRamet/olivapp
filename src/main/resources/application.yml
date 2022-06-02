@@ -6,7 +6,6 @@ spring:
       database: olivappdb
 # App Properties
 app:
-  auth:
-    jwtCookieName: olivapp
-    jwtSecret: olivappSecretKey
-    jwtExpirationMs: 86400000
+  jwtCookieName: olivapp
+  jwtSecret: olivappSecretKey
+  jwtExpirationMs: 86400000

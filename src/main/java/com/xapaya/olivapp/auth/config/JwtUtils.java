@@ -1,5 +1,6 @@
 package com.xapaya.olivapp.auth.config;
 
+import com.xapaya.olivapp.auth.service.UserDetailsImpl;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
@@ -8,7 +9,9 @@ import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.WebUtils;
@@ -23,10 +26,17 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class JwtUtils {
 
-    private final AppAuthProperties properties;
+    @Value("${app.jwtCookieName}")
+    private String jwtCookieName;
+
+    @Value("${app.jwtExpirationMs}")
+    private String jwtExpirationMs;
+
+    @Value("${app.jwtSecret}")
+    private String jwtSecret;
 
     public String getJwtFromCookies(HttpServletRequest request) {
-        Cookie cookie = WebUtils.getCookie(request, properties.jwtCookieName);
+        Cookie cookie = WebUtils.getCookie(request, this.jwtCookieName);
         if (cookie != null) {
             return cookie.getValue();
         } else {
@@ -35,20 +45,19 @@ public class JwtUtils {
     }
     public ResponseCookie generateJwtCookie(UserDetails userPrincipal) {
         String jwt = generateTokenFromUsername(userPrincipal.getUsername());
-        ResponseCookie cookie = ResponseCookie.from(properties.jwtCookieName, jwt)
+        return ResponseCookie.from(this.jwtCookieName, jwt)
                 .path("/api").maxAge(24 * 60 * 60).httpOnly(true).build();
-        return cookie;
     }
     public ResponseCookie getCleanJwtCookie() {
-        ResponseCookie cookie = ResponseCookie.from(properties.jwtCookieName, null).path("/api").build();
+        ResponseCookie cookie = ResponseCookie.from(this.jwtCookieName, null).path("/api").build();
         return cookie;
     }
     public String getUserNameFromJwtToken(String token) {
-        return Jwts.parser().setSigningKey(properties.jwtSecret).parseClaimsJws(token).getBody().getSubject();
+        return Jwts.parser().setSigningKey(this.jwtSecret).parseClaimsJws(token).getBody().getSubject();
     }
     public boolean validateJwtToken(String authToken) {
         try {
-            Jwts.parser().setSigningKey(properties.jwtSecret).parseClaimsJws(authToken);
+            Jwts.parser().setSigningKey(this.jwtSecret).parseClaimsJws(authToken);
             return true;
         } catch (SignatureException e) {
             log.error("Invalid JWT signature: {}", e.getMessage());
@@ -68,8 +77,18 @@ public class JwtUtils {
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(Date.from(Instant.now()))
-                .setExpiration(Date.from(Instant.now().plusMillis(properties.jwtExpirationMs)))
-                .signWith(SignatureAlgorithm.HS512, properties.jwtSecret)
+                .setExpiration(Date.from(Instant.now().plusMillis(Long.parseLong(this.jwtExpirationMs))))
+                .signWith(SignatureAlgorithm.HS512, this.jwtSecret)
+                .compact();
+    }
+
+    public String generateJwtToken(Authentication authentication) {
+        UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
+        return Jwts.builder()
+                .setSubject((userPrincipal.getUsername()))
+                .setIssuedAt(new Date())
+                .setExpiration( Date.from(Instant.now().plusMillis(Long.parseLong(jwtExpirationMs))))
+                .signWith(SignatureAlgorithm.HS512, jwtSecret)
                 .compact();
     }
 }
