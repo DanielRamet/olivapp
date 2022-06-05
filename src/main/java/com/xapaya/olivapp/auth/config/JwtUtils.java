@@ -14,9 +14,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-import org.springframework.web.util.WebUtils;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import java.time.Instant;
 import java.util.Date;
@@ -25,6 +23,9 @@ import java.util.Date;
 @Slf4j
 @RequiredArgsConstructor
 public class JwtUtils {
+
+    private static final String AUTH_HEADER = "Authorization";
+    private static final String AUTH_PREFIX = "Bearer ";
 
     @Value("${app.jwtCookieName}")
     private String jwtCookieName;
@@ -35,26 +36,14 @@ public class JwtUtils {
     @Value("${app.jwtSecret}")
     private String jwtSecret;
 
-    public String getJwtFromCookies(HttpServletRequest request) {
-        Cookie cookie = WebUtils.getCookie(request, this.jwtCookieName);
-        if (cookie != null) {
-            return cookie.getValue();
-        } else {
-            return null;
-        }
+    public String getJwt(HttpServletRequest request) {
+        return request.getHeader(AUTH_HEADER).replace(AUTH_PREFIX, "");
     }
-    public ResponseCookie generateJwtCookie(UserDetails userPrincipal) {
-        String jwt = generateTokenFromUsername(userPrincipal.getUsername());
-        return ResponseCookie.from(this.jwtCookieName, jwt)
-                .path("/api").maxAge(24 * 60 * 60).httpOnly(true).build();
-    }
-    public ResponseCookie getCleanJwtCookie() {
-        ResponseCookie cookie = ResponseCookie.from(this.jwtCookieName, null).path("/api").build();
-        return cookie;
-    }
+
     public String getUserNameFromJwtToken(String token) {
         return Jwts.parser().setSigningKey(this.jwtSecret).parseClaimsJws(token).getBody().getSubject();
     }
+
     public boolean validateJwtToken(String authToken) {
         try {
             Jwts.parser().setSigningKey(this.jwtSecret).parseClaimsJws(authToken);
