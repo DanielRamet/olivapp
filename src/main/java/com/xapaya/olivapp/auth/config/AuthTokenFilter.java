@@ -1,7 +1,8 @@
 package com.xapaya.olivapp.auth.config;
 
+import com.xapaya.olivapp.auth.service.UserDetailsServiceImpl;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,11 +19,11 @@ import java.io.IOException;
 
 @Slf4j
 @Configuration
+@RequiredArgsConstructor
 public class AuthTokenFilter extends OncePerRequestFilter {
-    @Autowired
-    private JwtUtils jwtUtils;
-    @Autowired
-    private UserDetailsService userDetailsService;
+
+    private final JwtUtils jwtUtils;
+    private final UserDetailsServiceImpl userDetailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)

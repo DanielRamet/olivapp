@@ -8,4 +8,4 @@ spring:
 app:
   jwtCookieName: olivapp
   jwtSecret: olivappSecretKey
-  jwtExpirationMs: 86400000
+  jwtExpirationMs: 300000

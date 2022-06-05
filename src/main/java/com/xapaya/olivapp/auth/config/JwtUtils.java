@@ -10,14 +10,13 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.Instant;
 import java.util.Date;
+import java.util.Optional;
 
 @Component
 @Slf4j
@@ -37,7 +36,9 @@ public class JwtUtils {
     private String jwtSecret;
 
     public String getJwt(HttpServletRequest request) {
-        return request.getHeader(AUTH_HEADER).replace(AUTH_PREFIX, "");
+        return Optional.ofNullable(request.getHeader(AUTH_HEADER))
+                .map(h -> h.replace(AUTH_PREFIX, ""))
+                .orElse(null);
     }
 
     public String getUserNameFromJwtToken(String token) {
