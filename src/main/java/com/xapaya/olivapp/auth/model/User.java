@@ -8,8 +8,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
-import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -28,6 +28,6 @@ public class User {
     @NotBlank
     @Size(max = 120)
     private String password;
-    @DBRef
-    private Set<Role> roles;
+    @NotEmpty
+    private Set<String> roles;
 }

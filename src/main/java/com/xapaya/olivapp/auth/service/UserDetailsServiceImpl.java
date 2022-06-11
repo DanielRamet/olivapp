@@ -3,6 +3,7 @@ package com.xapaya.olivapp.auth.service;
 import com.xapaya.olivapp.auth.model.User;
 import com.xapaya.olivapp.auth.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

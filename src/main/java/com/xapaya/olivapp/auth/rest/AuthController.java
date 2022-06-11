@@ -1,9 +1,7 @@
 package com.xapaya.olivapp.auth.rest;
 
 import com.xapaya.olivapp.auth.config.JwtUtils;
-import com.xapaya.olivapp.auth.model.Role;
 import com.xapaya.olivapp.auth.model.User;
-import com.xapaya.olivapp.auth.repository.RoleRepository;
 import com.xapaya.olivapp.auth.repository.UserRepository;
 import com.xapaya.olivapp.auth.rest.dto.JwtResponse;
 import com.xapaya.olivapp.auth.rest.dto.LoginRequest;
@@ -27,7 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -39,8 +36,6 @@ public class AuthController {
     AuthenticationManager authenticationManager;
     @Autowired
     UserRepository userRepository;
-    @Autowired
-    RoleRepository roleRepository;
     @Autowired
     PasswordEncoder encoder;
     @Autowired
@@ -73,6 +68,7 @@ public class AuthController {
                     .badRequest()
                     .body(new MessageResponse("Error: Email is already in use!"));
         }
+
         // Create new user's account
         User user = User.builder()
                 .username(signUpRequest.getUsername())
@@ -80,25 +76,10 @@ public class AuthController {
                 .password(encoder.encode(signUpRequest.getPassword()))
                 .build();
         List<String> strRoles = signUpRequest.getRoles();
-        Set<Role> roles = new HashSet<>();
         if (strRoles == null) {
-            Role userRole = roleRepository.findByName("ROLE_USER")
-                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-            roles.add(userRole);
-        } else {
-            strRoles.forEach(role -> {
-                if ("admin".equals(role)) {
-                    Role adminRole = roleRepository.findByName("ROLE_ADMIN")
-                            .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                    roles.add(adminRole);
-                } else {
-                    Role userRole = roleRepository.findByName("ROLE_USER")
-                            .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                    roles.add(userRole);
-                }
-            });
+            strRoles = List.of("ROLE_USER");
         }
-        user.setRoles(roles);
+        user.setRoles(new HashSet<>(strRoles));
         userRepository.save(user);
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
