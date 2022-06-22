@@ -4,8 +4,12 @@ import com.xapaya.olivapp.jobs.controller.dto.JobRequest;
 import com.xapaya.olivapp.jobs.model.Job;
 import com.xapaya.olivapp.jobs.repository.JobRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -25,17 +29,25 @@ public class JobService {
         return job;
     }
 
-    public void updateJob(JobRequest jobRequest, String id) {
+    public Job updateJob(JobRequest jobRequest, String id) {
         Job job = this.getJob(jobRequest);
         job.setId(id);
-        jobRepository.save(job);
-
+        job.setDisabled(jobRequest.isDisabled());
+        job = jobRepository.save(job);
         // notification
         notificationService.addNotification(id, "UPDATED");
+        return job;
     }
 
     public List<Job> getJobsByCurrentUser() {
         return jobRepository.findJobsByUserId(UserUtils.getCurrentUserId());
+    }
+
+    public List<Job> getJobsEmployee(Date date) {
+        if (date == null) {
+            date = Date.from(Instant.now());
+        }
+        return jobRepository.getCurrentAvailableJobs(date);
     }
 
     private Job getJob(JobRequest jobRequest) {

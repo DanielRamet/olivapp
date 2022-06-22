@@ -10,4 +10,5 @@ public class JobRequest {
     String type;
     Date start;
     Date end;
+    boolean disabled;
 }

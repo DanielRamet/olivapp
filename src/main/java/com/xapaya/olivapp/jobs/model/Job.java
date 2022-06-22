@@ -18,4 +18,5 @@ public class Job {
     private Date end;
     private String description;
     private String userId;
+    private boolean disabled;
 }
