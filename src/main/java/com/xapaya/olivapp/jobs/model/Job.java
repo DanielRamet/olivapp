@@ -13,10 +13,16 @@ import java.util.Date;
 public class Job {
     @Id
     private String id;
-    private String type;
+    private String userId; //owner
+
+    private RequestType requestType;
+
+    private JobType jobType;
+    private Integer season;
+
     private Date start;
     private Date end;
     private String description;
-    private String userId;
+
     private boolean disabled;
 }
